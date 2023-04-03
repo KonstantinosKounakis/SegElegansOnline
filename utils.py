@@ -680,14 +680,14 @@ def save_results_mask(name_image_final, image_gray, results_masks_NO, mask_overl
         ax1.imshow(image_gray, cmap='magma')
 
     ax2 = fig.add_subplot(222)
-    ax2.title.set_text('Good masks')
+    ax2.title.set_text('Center masks')
     ax2.imshow(worms_good, cmap=new_map, interpolation='None')
     for i in range(len(centroid_good)):
         ax2.text(centroid_good[i][1], centroid_good[i][0], label_good[i], fontdict=font,
                  bbox=dict(facecolor='black', edgecolor='red', linewidth=2))
 
     ax3 = fig.add_subplot(223)
-    ax3.title.set_text('Bad masks')
+    ax3.title.set_text('Edge and small mask')
     ax3.imshow(worms_bads, cmap=new_map, interpolation='None')
     for i in range(len(centroid_bads)):
         ax3.text(centroid_bads[i][1], centroid_bads[i][0], label_bads[i], fontdict=font,
