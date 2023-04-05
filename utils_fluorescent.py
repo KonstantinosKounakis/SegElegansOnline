@@ -174,12 +174,12 @@ def label2contour(image_fluorescent, labels_F):
     return img2
 
 
-def save_fluorescent_img_results(name_image_final, image_fluorescent, image_complete_mask, im2):
+def save_fluorescent_img_results(name_image_final, image_fluorescent, image_complete_mask, im2, true_worms):
     worms_good, new_map = Ndims2image(image_complete_mask, 1)
 
     im3 = im2.copy()
     for i in range(3):
-        im3[:, :, i] = im3[:, :, i] * ((dst > 0) * 1)
+        im3[:, :, i] = im3[:, :, i] * ((true_worms > 0) * 1)
 
     plt.ioff()  # Turn interactive plotting off
     fig = plt.figure(figsize=(15, 15))
