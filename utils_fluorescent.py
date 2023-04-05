@@ -11,6 +11,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 from skimage.segmentation import watershed
 from skimage.morphology import skeletonize
+from utils import *
 import warnings
 warnings.filterwarnings('ignore')
 
