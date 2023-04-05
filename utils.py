@@ -680,7 +680,7 @@ def save_results_mask(name_image_final, image_gray, results_masks_NO, mask_overl
         ax1.imshow(image_gray, cmap='magma')
 
     ax2 = fig.add_subplot(222)
-    ax2.title.set_text('Center masks')
+    ax2.title.set_text('Complete masks')
     ax2.imshow(worms_good, cmap=new_map, interpolation='None')
     for i in range(len(centroid_good)):
         ax2.text(centroid_good[i][1], centroid_good[i][0], label_good[i], fontdict=font,
