@@ -14,7 +14,8 @@ from PIL import Image, ImageDraw
 import math
 import numpy.matlib as npm
 from roifile import ImagejRoi, roiwrite
-from models.UMF_ConvLSTM import UMF_ConvLSTM
+from models.UMF_ConvLSTM import UMF_ConvLSTM\
+import imagecodecs
 
 
 def imread_image(path_image):
