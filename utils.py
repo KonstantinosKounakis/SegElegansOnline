@@ -1,11 +1,10 @@
+import warnings
+import os
 import gc
 import torch
 import random
-import tifffile
 import numpy as np
-import os
 import cv2
-import matplotlib.pyplot as plt
 from skimage.morphology import skeletonize
 from skimage import measure, morphology
 from scipy import ndimage
@@ -14,8 +13,9 @@ from PIL import Image, ImageDraw
 import math
 import numpy.matlib as npm
 from roifile import ImagejRoi, roiwrite
-from models.UMF_ConvLSTM import UMF_ConvLSTM\
-
+from tqdm import tqdm
+import matplotlib.pyplot as plt
+import tifffile
 
 def imread_image(path_image):
     head, tail = os.path.split(path_image)
@@ -48,7 +48,7 @@ def save_mask_tif(path_save, img):
     if img.shape[0] == 0:
         d, h, w = img.shape
         img = np.zeros((h, w))
-    tifffile.imsave(path_save, img.astype(np.uint8))
+    tifffile.imwrite(path_save, img.astype(np.uint8))
 
 
 def update_mask(true_mask, mask):
@@ -807,3 +807,11 @@ def IoU_per_worm(image_masK_ground_truth, masK_predict_all, Per_value):
     avg_per_worm = sum(IoU_worms_gt) / len(IoU_worms_gt)
     avg_pecetage = sum(IoU_worms_perc) / len(IoU_worms_perc)
     return avg_per_worm, avg_pecetage
+
+warnings.filterwarnings('ignore')
+
+try:
+  os.mkdir('/content/EleganSeg')
+except FileExistsError:
+  pass
+
