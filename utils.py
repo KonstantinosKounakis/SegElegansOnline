@@ -1,11 +1,10 @@
+import warnings
+import os
 import gc
 import torch
 import random
-import tifffile
 import numpy as np
-import os
 import cv2
-import matplotlib.pyplot as plt
 from skimage.morphology import skeletonize
 from skimage import measure, morphology
 from scipy import ndimage
@@ -14,8 +13,9 @@ from PIL import Image, ImageDraw
 import math
 import numpy.matlib as npm
 from roifile import ImagejRoi, roiwrite
-from models.UMF_ConvLSTM import UMF_ConvLSTM\
-
+from tqdm import tqdm
+import matplotlib.pyplot as plt
+import tifffile
 
 def imread_image(path_image):
     head, tail = os.path.split(path_image)
@@ -48,7 +48,7 @@ def save_mask_tif(path_save, img):
     if img.shape[0] == 0:
         d, h, w = img.shape
         img = np.zeros((h, w))
-    tifffile.imsave(path_save, img.astype(np.uint8))
+    tifffile.imwrite(path_save, img.astype(np.uint8))
 
 
 def update_mask(true_mask, mask):
@@ -117,70 +117,6 @@ def labels_list(label_segmentation):
         if i != 0:
             labels_list_noneZero.append(i)
     return labels_list_noneZero
-
-
-def get_image_network(device, dir_checkpoint, n_classes, in_size, image_gray, batch_img):
-    model = UMF_ConvLSTM(n_channels=1, n_classes=n_classes, bilinear=True, type_net=1)
-    model.load_state_dict(torch.load(dir_checkpoint))
-    model.eval()
-    model.to(device=device)
-
-    h, w = image_gray.shape
-    h_steps = setps_crop(h, in_size, 3)
-    w_steps = setps_crop(w, in_size, 3)
-    list_box = []
-    for i in h_steps:
-        for j in w_steps:
-            crop = [i, i + in_size, j, j + in_size]
-            list_box.append(crop)
-
-    n_crops = len(list_box)
-    n_reps = 1
-    f = 0
-    while f == 0:
-        if (batch_img * n_reps) < n_crops:
-            n_reps = n_reps + 1
-        else:
-            f = 1
-
-    if n_classes == 1:
-        masK_img = np.zeros((h, w), dtype="uint8")
-
-    if n_classes == 4:
-        masK_img = np.zeros((h, w, 3), dtype="uint8")
-
-    with torch.no_grad():
-        cnt_crops1 = 0
-        cnt_crops2 = 0
-        for i in range(n_reps):
-            masK_crops = np.zeros((h, w), dtype="uint8")
-            for j in range(batch_img):
-                if cnt_crops1 < n_crops:
-                    image_i = image_gray[list_box[cnt_crops1][0]:list_box[cnt_crops1][1], list_box[cnt_crops1][2]:list_box[cnt_crops1][3]]
-                    image_i = np.expand_dims(image_i, axis=0)
-                    masK_crops = update_mask(masK_crops, image_i)
-                    cnt_crops1 = cnt_crops1 + 1
-
-            image_i = torch.from_numpy(masK_crops).to(device=device, dtype=torch.float32).unsqueeze(1)
-            image_i = model(image_i)
-            image_i = (torch.sigmoid(image_i) > 0.5) * 255
-            image_i = image_i.cpu().numpy().astype('uint8')
-
-            for j in range(batch_img):
-                if cnt_crops2 < n_crops:
-                    if n_classes == 1:
-                        masK_img[list_box[cnt_crops2][0]:list_box[cnt_crops2][1], list_box[cnt_crops2][2]:list_box[cnt_crops2][3]] = image_i[j, :, :, :]
-
-                    if n_classes == 4:
-                        masK_img[list_box[cnt_crops2][0]:list_box[cnt_crops2][1], list_box[cnt_crops2][2]:list_box[cnt_crops2][3], 0] = image_i[j, 1, :, :]
-                        masK_img[list_box[cnt_crops2][0]:list_box[cnt_crops2][1], list_box[cnt_crops2][2]:list_box[cnt_crops2][3], 1] = image_i[j, 2, :, :]
-                        masK_img[list_box[cnt_crops2][0]:list_box[cnt_crops2][1], list_box[cnt_crops2][2]:list_box[cnt_crops2][3], 2] = image_i[j, 3, :, :]
-                    cnt_crops2 = cnt_crops2 + 1
-
-    del model, image_i, masK_crops
-    gc.collect()
-    torch.cuda.empty_cache()
-    return masK_img
 
 
 def build_edge(image_bw):
@@ -807,3 +743,11 @@ def IoU_per_worm(image_masK_ground_truth, masK_predict_all, Per_value):
     avg_per_worm = sum(IoU_worms_gt) / len(IoU_worms_gt)
     avg_pecetage = sum(IoU_worms_perc) / len(IoU_worms_perc)
     return avg_per_worm, avg_pecetage
+
+warnings.filterwarnings('ignore')
+
+try:
+  os.mkdir('/content/EleganSeg')
+except FileExistsError:
+  pass
+
