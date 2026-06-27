@@ -13,7 +13,7 @@ from PIL import Image, ImageDraw
 import math
 import numpy.matlib as npm
 from roifile import ImagejRoi, roiwrite
-from tqdm import tqdm
+from tqdm.auto import tqdm
 import matplotlib.pyplot as plt
 import tifffile
 
