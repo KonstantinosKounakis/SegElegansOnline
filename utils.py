@@ -26,7 +26,9 @@ def imread_image(path_image):
     else:
         # image = cv2.imread(path_image, cv2.IMREAD_GRAYSCALE)
         image = cv2.imread(path_image)
-    return image.astype('uint8')
+    if image.dtype != np.uint8:
+       image = cv2.normalize(image, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
+    return image
 
 
 def read_tiff_mask(path_image_mask):
